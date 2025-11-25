@@ -84,7 +84,7 @@ async def make_screenshot(url: str) -> BytesIO:
 def crop_remove_top_20(img_bytes: BytesIO) -> BytesIO:
     img = Image.open(img_bytes)
     w, h = img.size
-    cropped = img.crop((0, int(h * 0.30), w, h))
+    cropped = img.crop((0, int(h * 0.20), w, h))
     out = BytesIO()
     cropped.save(out, "PNG")
     out.seek(0)
