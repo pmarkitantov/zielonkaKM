@@ -46,12 +46,15 @@ async def make_screenshot(url: str) -> BytesIO:
         "&screenshot=true"
         "&embed=screenshot.url"
         "&force=true"
-        "&viewport.height=1200"
+        "&viewport.scrollY=0"
+        "&waitFor=5000"
+        "&cache=false"
     )
 
     headers = {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
     }
 
     async with session.get(api_url, headers=headers) as resp:
