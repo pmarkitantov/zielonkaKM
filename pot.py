@@ -18,6 +18,8 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise Exception("BOT_TOKEN не найден!")
 
+SCREENSHOTONE_ACCESS_KEY = os.getenv("SCREENSHOTONE_ACCESS_KEY", "FhUlYo63VR0gXA")
+
 TARGET_URL = os.getenv("TARGET_URL") or os.getenv("URL")
 if not TARGET_URL:
     raise Exception("TARGET_URL или URL не найден в переменных окружения!")
@@ -39,19 +41,25 @@ async def make_screenshot(url: str) -> BytesIO:
     new_query = urlencode(query_params, doseq=True)
     url_with_cache_bust = urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
     
-    unique_dummy = int(time.time() * 1000)
     encoded_url = quote(url_with_cache_bust, safe='')
     api_url = (
-        f"https://api.microlink.io/"
-        f"?url={encoded_url}"
-        f"&screenshot=true"
-        f"&force=true"
-        f"&fullPage=true"
-        f"&waitFor=8000"
-        f"&device=desktop"
-        f"&meta=false"
-        f"&embed=screenshot.url"
-        f"&_dummy={unique_dummy}"
+        f"https://api.screenshotone.com/take"
+        f"?access_key={SCREENSHOTONE_ACCESS_KEY}"
+        f"&url={encoded_url}"
+        f"&format=jpg"
+        f"&block_ads=true"
+        f"&block_cookie_banners=true"
+        f"&block_banners_by_heuristics=true"
+        f"&block_trackers=true"
+        f"&block_chats=true"
+        f"&delay=0"
+        f"&timeout=60"
+        f"&wait_until=networkidle2"
+        f"&wait_until=networkidle0"
+        f"&wait_until=domcontentloaded"
+        f"&wait_until=load"
+        f"&response_type=by_format"
+        f"&image_quality=80"
     )
 
     headers = {
@@ -63,29 +71,17 @@ async def make_screenshot(url: str) -> BytesIO:
     async with session.get(api_url, headers=headers) as resp:
         if resp.status != 200:
             error_text = await resp.text()
-            raise Exception(f"Microlink ошибка {resp.status}: {error_text[:200]}")
+            raise Exception(f"ScreenshotOne ошибка {resp.status}: {error_text[:200]}")
         
         content_type = resp.headers.get('Content-Type', '')
         
-        if 'image' in content_type:
-            buf = BytesIO(await resp.read())
-            buf.seek(0)
-            return buf
+        if 'image' not in content_type:
+            error_text = await resp.text()
+            raise Exception(f"ScreenshotOne вернул не изображение. Content-Type: {content_type}, Ответ: {error_text[:200]}")
         
-        data = await resp.json()
-        img_url = data.get("data", {}).get("screenshot", {}).get("url")
-        if not img_url:
-            img_url = data.get("data", {}).get("url")
-        
-        if not img_url:
-            raise Exception(f"Microlink не вернул URL изображения. Ответ: {data}")
-
-        async with session.get(img_url) as img_resp:
-            if img_resp.status != 200:
-                raise Exception(f"Ошибка загрузки PNG изображения {img_resp.status}")
-            buf = BytesIO(await img_resp.read())
-            buf.seek(0)
-            return buf
+        buf = BytesIO(await resp.read())
+        buf.seek(0)
+        return buf
 
 def crop_remove_top_20(img_bytes: BytesIO) -> BytesIO:
     img = Image.open(img_bytes)
