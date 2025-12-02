@@ -46,10 +46,10 @@ async def make_screenshot(url: str) -> BytesIO:
         "&screenshot=true"
         "&embed=screenshot.url"
         "&viewport.scrollY=0"
-        "&waitFor=3000"
+        "&waitFor=5000"
         "&waitUntil=networkidle2"
         "&cache=false"
-        "&remove.modals=true"
+        "&dismissModals=true"
     )
 
     headers = {
