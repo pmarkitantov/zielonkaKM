@@ -18,7 +18,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
     raise Exception("BOT_TOKEN не найден!")
 
-SCREENSHOTONE_ACCESS_KEY = os.getenv("SCREENSHOTONE_ACCESS_KEY", "FhUlYo63VR0gXA")
+SCREENSHOTONE_ACCESS_KEY = os.getenv("SCREENSHOTONE_ACCESS_KEY")
 
 TARGET_URL = os.getenv("TARGET_URL") or os.getenv("URL")
 if not TARGET_URL:
@@ -86,7 +86,10 @@ async def make_screenshot(url: str) -> BytesIO:
 def crop_remove_top_20(img_bytes: BytesIO) -> BytesIO:
     img = Image.open(img_bytes)
     w, h = img.size
-    cropped = img.crop((0, int(h * 0.20), w, h))
+    left = int(w * 0.15)
+    right = int(w * 0.85)
+    top = int(h * 0.35)
+    cropped = img.crop((left, top, right, h))
     out = BytesIO()
     cropped.save(out, "PNG")
     out.seek(0)
