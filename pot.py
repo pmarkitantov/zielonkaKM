@@ -45,9 +45,8 @@ async def make_screenshot(url: str) -> BytesIO:
         "&overlay.browser=dark"
         "&screenshot=true"
         "&embed=screenshot.url"
-        "&force=true"
         "&viewport.scrollY=0"
-        "&waitFor=5000"
+        "&waitUntil=networkidle2"
         "&cache=false"
     )
 
