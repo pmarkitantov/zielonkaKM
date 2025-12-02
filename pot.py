@@ -39,17 +39,19 @@ async def make_screenshot(url: str) -> BytesIO:
     new_query = urlencode(query_params, doseq=True)
     url_with_cache_bust = urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
     
+    unique_dummy = int(time.time() * 1000)
     encoded_url = quote(url_with_cache_bust, safe='')
     api_url = (
-        f"https://api.microlink.io/?url={encoded_url}"
-        "&overlay.browser=dark"
-        "&screenshot=true"
-        "&embed=screenshot.url"
-        "&viewport.scrollY=0"
-        "&waitFor=5000"
-        "&waitUntil=networkidle2"
-        "&cache=false"
-        "&dismissModals=true"
+        f"https://api.microlink.io/"
+        f"?url={encoded_url}"
+        f"&screenshot=true"
+        f"&force=true"
+        f"&fullPage=true"
+        f"&waitFor=8000"
+        f"&device=desktop"
+        f"&meta=false"
+        f"&embed=screenshot.url"
+        f"&_dummy={unique_dummy}"
     )
 
     headers = {
