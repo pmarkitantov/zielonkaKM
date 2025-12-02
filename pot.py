@@ -86,8 +86,8 @@ async def make_screenshot(url: str) -> BytesIO:
 def crop_remove_top_20(img_bytes: BytesIO) -> BytesIO:
     img = Image.open(img_bytes)
     w, h = img.size
-    left = int(w * 0.15)
-    right = int(w * 0.85)
+    left = int(w * 0.10)
+    right = int(w * 0.60)
     top = int(h * 0.35)
     cropped = img.crop((left, top, right, h))
     out = BytesIO()
